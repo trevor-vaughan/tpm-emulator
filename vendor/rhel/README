@@ -1,0 +1,10 @@
+These files can be used to build the TPM emulator for EL6 and EL7 systems.
+
+If using 'mock', it is suggested that you use the following commands to build:
+
+mkdir output
+mock -r epel-7-x86_64 --scrub=all
+mock -r epel-7-x86_64 --install kernel kernel-devel openssl
+mock -r epel-7-x86_64 --buildsrpm --sources=`pwd`/tpm-emulator-0.7.4.tar.gz --spec=`pwd`/tpm-emulator-0.7.4/vendor/rhel/tpm-emulator.spec --resultdir=`pwd`/output --no-clean --no-cleanup-after
+mock -r epel-7-x86_64 --install kernel kernel-devel
+mock -r epel-7-x86_64 `pwd`/output/tpm-emulator-0.7.4-1.el7.src.rpm --resultdir=`pwd`/output --no-cleanup-after --no-clean

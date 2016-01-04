@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides: tpm
+# Required-Start:
+# Required-Stop:
+# Default-Start: 1 2 3 4 5
+# Default-Stop: 0 6
+# chkconfig: 12345 95 05
+# Description: A TPM Emulator - Primarily for Testing
+### END INIT INFO
+source /etc/init.d/functions
+
+DAEMON=/opt/tpm-emulator/bin/tpmd
+
+prog='tpmd'
+lockfile=/var/lock/subsys/tpm-emulator
+
+#
+# Start the TPM Emulator
+# Load the kernel module and start the emulator
+#
+start() {
+  echo -n $"Loading kernel module tpmd_dev"
+  modprobe tpmd_dev
+  RETVAL=$?
+
+  if [ $RETVAL = 0 ]; then
+    echo -n $"Starting $prog: "
+    daemon $DAEMON
+    RETVAL=$?
+  else
+    echo -n $"Error: Could not load kernel module 'tpmd_dev'"
+  fi
+
+  echo
+  [ $RETVAL = 0 ] && touch $lockfile
+}
+
+#
+# Stop the TPM Daemon and unload the kernel module
+#
+stop() {
+  echo -n $"Unloading kernel module tpmd_dev"
+  rmmod tpmd_dev
+
+  echo -n $"Stopping $prog: "
+  killproc $DAEMON
+  RETVAL=$?
+  echo
+  [$RETVAL = 0 ] && rm $lockfile
+  return
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+
+  stop)
+    stop
+    ;;
+
+  restart)
+    stop
+    start
+    ;;
+
+  status)
+    status $prog
+    exit 0
+    ;;
+
+  *)
+    echo "Usage: $0 {start|stop|status|restart}"
+    RETVAL=3
+    ;;
+esac
+
+exit $RETVAL
